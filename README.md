@@ -7,12 +7,12 @@
 #### Version: 0.0.1
 
 #### Summary:
-1. This is my first project in the Macaw Project.
+1. This is my first machine learning project that deals with images.
 2. This is being built using techniques learned in Coursera's Deep Learning Specialization.
 3. The project is focused on Computer Vision and will be using basic forward and backward propagation techniques.
 
 #### Description:
-This is my first project in the Macaw Project. This is being built using techniques learned in Coursera's Deep Learning Specialization.
+This is my first machine learning project that deals with images. This is being built using techniques learned in Coursera's Deep Learning Specialization.
 The project is focused on Computer Vision and will be using basic forward and backward propagation techniques. It was originally built using Conv2D and Dense layers, but I'm reworking it to use more basic functions for educational purposes.  
 The idea for this project was originally inspired by an assignment in the Coursera Machine Learning For All course, where you uploaded your own images and had them classified by a trained model.
 
