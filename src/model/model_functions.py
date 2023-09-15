@@ -266,7 +266,7 @@ def linear_backward(dZ, cache):
     
     return dA_prev, dW, db
 
-def linear_activation_backward(dA, cache, activation): #requires linear_backward
+def linear_activation_backward(dA, cache, activation):
     """
     Implement the backward propagation for the LINEAR->ACTIVATION layer.
     
