@@ -1,8 +1,10 @@
 import os
+import sys
 import numpy as np
 from PIL import Image
 import pickle
 
+sys.path.append("../")
 from src.helper.config import folder1_path, folder2_path, folder3_path
 
 def load_images(folder_path, label):

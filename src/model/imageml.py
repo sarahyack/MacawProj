@@ -1,3 +1,4 @@
+import sys
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
@@ -7,9 +8,10 @@ from tensorflow.keras.layers import Dense, Conv2D, Flatten
 from tensorflow.keras.losses import SparseCategoricalCrossentropy
 from tensorflow.keras.regularizers import l2
 
+sys.path.append("../")
 from helper.config import *
 from helper.utility_functions import *
-from model.model_functions import *
+import model_functions
 
 # Path to save or load the model
 X, y = load_data(image_data_path)

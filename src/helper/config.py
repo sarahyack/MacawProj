@@ -3,6 +3,8 @@
 model_path = "C:\\Users\\Sarah\\Documents\\My Projects\\Coding\\VS PyProjects\\MacawProj\\my_model"
 #Path to image data (training data)
 image_data_path = "C:\\Users\\Sarah\\Documents\\My Projects\\Coding\\VS PyProjects\\MacawProj\\image-data\\image_data.pkl"
+#Path to image data (test data)
+image_test_data_path = "C:\\Users\\Sarah\\Documents\\My Projects\\Coding\\VS PyProjects\\MacawProj\\image-data\\image_test_data.pkl"
 #Paths for processing training data
 folder1_path = "C:\\Users\\Sarah\\Documents\\My Projects\\Coding\\Machine Learning\\MLFA Project\\Training\\Not Birds"
 folder2_path = "C:\\Users\\Sarah\\Documents\\My Projects\\Coding\\Machine Learning\\MLFA Project\\Training\\Birds"
