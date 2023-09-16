@@ -8,14 +8,27 @@ sys.path.append("../")
 from src.helper.config import folder1_path, folder2_path, folder3_path
 
 def load_images(folder_path, label):
+    """
+    Load images from a specified folder path and assign labels to them.
+    
+    Parameters:
+    folder_path (str): The path to the folder containing the images.
+    label (str): The label to assign to the loaded images.
+    
+    Returns:
+    images (list): A list of standardized image arrays.
+    labels (list): A list of labels corresponding to the loaded images.
+    """
     images = []
     labels = []
     for filename in os.listdir(folder_path):
         if filename.endswith(".jpg") or filename.endswith(".png"):
             filepath = os.path.join(folder_path, filename)
-            image = Image.open(filepath).convert("L").resize((28, 28))
-            image_array = np.array(image) / 255.0
-            images.append(image_array)
+            image = Image.open(filepath).convert("RGB").resize((28, 28))
+            image_array = np.array(image)
+            image_array_flatten = image_array.reshape(image_array.shape[0] * image_array.shape[1] * image_array.shape[2], 1)
+            image_array_standardized = image_array_flatten / 255.0
+            images.append(image_array_standardized)
             labels.append(label)
     return images, labels
 
