@@ -360,9 +360,9 @@ def update_parameters(params, grads, learning_rate):
         # YOUR CODE ENDS HERE
     return parameters
 
-def update_parameters(parameters, grads, learning_rate = 1.2):
+def update_parameters(parameters, grads, learning_rate = 1.2): #deep layer version
     """
-    Updates parameters using the gradient descent update rule given above
+    Updates parameters using the gradient descent update rule
     
     Arguments:
     parameters -- python dictionary containing your parameters 

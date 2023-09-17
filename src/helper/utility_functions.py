@@ -91,6 +91,13 @@ def plot_metrics(history):
     plt.tight_layout()
     plt.show()
 
+def plot_costs(costs, learning_rate=0.0075):
+    plt.plot(np.squeeze(costs))
+    plt.ylabel('cost')
+    plt.xlabel('iterations (per hundreds)')
+    plt.title("Learning rate =" + str(learning_rate))
+    plt.show()
+
 def evaluate_model(model, X_test, y_test):
     predictions = model.predict(X_test)
     predicted_classes = (predictions > 0.5).astype("int")
