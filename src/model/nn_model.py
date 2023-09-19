@@ -1,4 +1,6 @@
+import numpy as np
 
+from model_functions import *
 
 def nn_model(X, Y, n_h, num_iterations = 10000, print_cost=False):
     """
@@ -198,11 +200,11 @@ def L_layer_model(X, Y, layers_dims, X_cv=None, Y_cv=None, learning_rate = 0.007
                 if len(augmented_X) >= len(X) / 32:  # Enough augmented data
                     break
 
-        augmented_X = np.concatenate(augmented_X)
-        augmented_Y = np.concatenate(augmented_Y)
+            augmented_X = np.concatenate(augmented_X)
+            augmented_Y = np.concatenate(augmented_Y)
 
-        X = np.concatenate((X, augmented_X))
-        Y = np.concatenate((Y, augmented_Y))
+            X = np.concatenate((X, augmented_X))
+            Y = np.concatenate((Y, augmented_Y))
 
         # Loop (gradient descent)
         for i in range(0, num_iterations):

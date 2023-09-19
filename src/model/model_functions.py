@@ -24,6 +24,10 @@ def relu_backward(dA, activation_cache):
     dZ[z <= 0] = 0
     return dZ
 
+def softmax(Z):
+    expZ = np.exp(Z - np.max(Z))
+    return expZ / expZ.sum(axis=0, keepdims=True)
+
 def layer_sizes(X, Y):
     """
     Arguments:
@@ -85,6 +89,7 @@ def initialize_parameters_deep(layer_dims):
     L = len(layer_dims) # number of layers in the network
 
     for l in range(1, L):
+
         parameters['W' + str(l)] = np.random.randn(layer_dims[l], layer_dims[l-1]) * 0.01
         parameters['b' + str(l)] = np.zeros((layer_dims[l], 1))
         
@@ -107,8 +112,9 @@ def linear_forward(A, W, b):
     Z -- the input of the activation function, also called pre-activation parameter 
     cache -- a python tuple containing "A", "W" and "b" ; stored for computing the backward pass efficiently
     """
+    A_reshaped = A.reshape(A.shape[0], -1).T
     
-    Z = np.dot(W, A) + b
+    Z = np.dot(W, A_reshaped) + b
     cache = (A, W, b)
     
     return Z, cache
@@ -135,7 +141,10 @@ def linear_activation_forward(A_prev, W, b, activation):
     elif activation == "relu":
         Z, linear_cache = linear_forward(A_prev, W, b)
         A, activation_cache = relu(Z)
-
+    elif activation == "softmax":
+        Z, linear_cache = linear_forward(A_prev, W, b)
+        A, activation_cache = softmax(Z)
+    
     cache = (linear_cache, activation_cache)
 
     return A, cache
@@ -164,7 +173,7 @@ def L_model_forward(X, parameters):
         caches.append(cache)
         
     
-    AL, cache = linear_activation_forward(A, parameters['W' + str(L)], parameters['b' + str(L)], "sigmoid")
+    AL, cache = linear_activation_forward(A, parameters['W' + str(L)], parameters['b' + str(L)], "softmax")
     caches.append(cache)
           
     return AL, caches
@@ -214,9 +223,10 @@ def compute_cost(A2, Y): #Substitute A2 for AL when using more than two layers
     
     m = Y.shape[1] 
 
-    logprobs = np.multiply(np.log(A2), Y) + np.multiply(np.log(1-A2), (1-Y))
-    cost = (-np.sum(np.multiply(np.log(A2), Y) + np.multiply(np.log(1-A2), (1-Y))))/m
+    # logprobs = np.multiply(np.log(A2), Y) + np.multiply(np.log(1-A2), (1-Y))
+    # cost = (-np.sum(np.multiply(np.log(A2), Y) + np.multiply(np.log(1-A2), (1-Y))))/m
     
+    cost = -1/m * np.sum(Y * np.log(AL))
     cost = float(np.squeeze(cost))     
     
     return cost

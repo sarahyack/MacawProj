@@ -10,13 +10,11 @@ from sklearn.metrics import accuracy_score
 def load_data(file_path):
     with open(file_path, "rb") as f:
         image_data = pickle.load(f)
-    print(f"Shape of loaded X inside load_data: {image_data[0].shape}")
     if type(image_data) == tuple:
         X, y = image_data
     else:
         X = np.array(image_data['images'])
         y = np.array(image_data['labels'])
-    print(f"Shape of loaded X: {X.shape}")
     return X, y
 
 def split_dataset(X, y, test_size, test_split):
@@ -41,14 +39,9 @@ def split_dataset(X, y, test_size, test_split):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size)
     X_train, X_cv, y_train, y_cv = train_test_split(X_train, y_train, test_size=test_split)
 
-    print(f"Shape of X_train inside split_dataset: {X_train.shape}")
-    print(f"Shape of X_test inside split_dataset: {X_test.shape}")
-    print(f"Shape of X_cv inside split_dataset: {X_cv.shape}")
-
     return X_train, X_test, X_cv, y_train, y_test, y_cv
 
 def preprocess_images(X_train):
-    print(f"Shape of X_train at start of preprocess_images: {X_train.shape}")
     X_train = X_train.reshape(-1, 28, 28, 3)
     datagen = ImageDataGenerator(
         rotation_range=30,
