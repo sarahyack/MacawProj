@@ -7,10 +7,22 @@ import sklearn.linear_model
 
 def sigmoid(z):
     A = 1 / (1 + np.exp(-z))
-    return A
+    return A, {'z': z}
 
 def relu(z):
-    return np.maximum(0, z)
+    return np.maximum(0, z), {'z': z}
+
+def sigmoid_backward(dA, activation_cache):
+    z = activation_cache['z']
+    A = sigmoid(z)
+    dZ = dA * (A * (1 - A)) # A*(1 - A) is the derivative of sigmoid function
+    return dZ
+
+def relu_backward(dA, activation_cache):
+    z = activation_cache['z']
+    dZ = np.array(dA, copy=True)
+    dZ[z <= 0] = 0
+    return dZ
 
 def layer_sizes(X, Y):
     """
@@ -360,7 +372,7 @@ def update_parameters(params, grads, learning_rate):
         # YOUR CODE ENDS HERE
     return parameters
 
-def update_parameters(parameters, grads, learning_rate = 1.2): #deep layer version
+def update_parameters_deep(parameters, grads, learning_rate = 1.2): #deep layer version
     """
     Updates parameters using the gradient descent update rule
     
@@ -392,37 +404,6 @@ def update_parameters(parameters, grads, learning_rate = 1.2): #deep layer versi
                   "W2": W2,
                   "b2": b2}
     
-    return parameters
-
-def nn_model(X, Y, n_h, num_iterations = 10000, print_cost=False):
-    """
-    Arguments:
-    X -- dataset of shape (2, number of examples)
-    Y -- labels of shape (1, number of examples)
-    n_h -- size of the hidden layer
-    num_iterations -- Number of iterations in gradient descent loop
-    print_cost -- if True, print the cost every 1000 iterations
-    
-    Returns:
-    parameters -- parameters learnt by the model. They can then be used to predict.
-    """
-    
-    np.random.seed(3)
-    n_x = layer_sizes(X, Y)[0]
-    n_y = layer_sizes(X, Y)[2]
-
-    parameters = initialize_parameters(n_x, n_h, n_y)
-
-    for i in range(0, num_iterations):
-        
-        A2, cache = forward_propagation(X, parameters)
-        cost = compute_cost(A2, Y)
-        grads = backward_propagation(parameters, cache, X, Y)
-        parameters = update_parameters(parameters, grads)
-
-        if print_cost and i % 1000 == 0:
-            print ("Cost after iteration %i: %f" %(i, cost))
-
     return parameters
 
 def predict(parameters, X):

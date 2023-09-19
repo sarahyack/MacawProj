@@ -75,11 +75,11 @@ def predict(parameters, X):
     return predictions
 
 # Build a model with a n_h-dimensional hidden layer
-parameters = nn_model(X, Y, n_h = 4, num_iterations = 10000, print_cost=True)
+# parameters = nn_model(X, Y, n_h = 4, num_iterations = 10000, print_cost=True)
 
 # Plot the decision boundary
-plot_decision_boundary(lambda x: predict(parameters, x.T), X, Y)
-plt.title("Decision Boundary for hidden layer size " + str(4))
+# plot_decision_boundary(lambda x: predict(parameters, x.T), X, Y)
+# plt.title("Decision Boundary for hidden layer size " + str(4))
 
 def two_layer_model(X, Y, layers_dims, learning_rate = 0.0075, num_iterations = 3000, print_cost=False):
     """
@@ -214,7 +214,7 @@ def L_layer_model(X, Y, layers_dims, learning_rate = 0.0075, num_iterations = 30
         grads = L_model_backward(AL, Y, caches)
          
         # Update parameters.
-        parameters = update_parameters(parameters, grads, learning_rate)
+        parameters = update_parameters_deep(parameters, grads, learning_rate)
                 
         # Print the cost every 100 iterations
         if print_cost and i % 100 == 0 or i == num_iterations - 1:

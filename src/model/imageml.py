@@ -12,6 +12,7 @@ sys.path.append("../")
 from helper.config import *
 from helper.utility_functions import *
 import model_functions
+import nn_model
 
 # Path to save or load the model
 X, y = load_data(image_data_path)
@@ -27,17 +28,9 @@ datagen = preprocess_images(X)
 model = load_model(model_path)
 
 hidden_layers = [4, 16, 128, 32]
-initialize_parameters_deep(hidden_layers)
 
 if model is None:
-    model = Sequential([
-        Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)),
-        Conv2D(64, (3, 3), activation='relu'),
-        Flatten(),
-        Dense(128, activation='relu', kernel_regularizer=l2(0.01)),
-        Dense(3, activation='softmax', kernel_regularizer=l2(0.01))
-    ], name='my_conv_model')
-    model.compile(loss=SparseCategoricalCrossentropy(), optimizer=tf.keras.optimizers.Adam())
+    parameters, costs = L_layer_model(X_train, y, hidden_layers, 0.0075, 3000, False)
     print("New model created.")
 
 # Fit the model
@@ -51,7 +44,7 @@ save_model(model, model_path)
 # Plotting
 plot_metrics(history)
 
-predictions = model.predict(X_test)
+predictions = predict(X_test)
 y_pred = np.argmax(predictions, axis=1)
 num_errors = np.sum(y_pred != y_test)
 
