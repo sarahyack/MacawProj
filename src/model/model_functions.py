@@ -422,3 +422,11 @@ def predict(parameters, X):
     predictions = (A2 > 0.5)
     
     return predictions
+
+def predict_multi(parameters, X):
+    print(X.shape)
+    output, _ = L_model_forward(X, parameters)
+    predictions = np.argmax(output, axis=1)
+
+    return predictions
+

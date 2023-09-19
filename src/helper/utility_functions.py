@@ -1,3 +1,4 @@
+import os
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
@@ -9,11 +10,13 @@ from sklearn.metrics import accuracy_score
 def load_data(file_path):
     with open(file_path, "rb") as f:
         image_data = pickle.load(f)
+    print(f"Shape of loaded X inside load_data: {image_data[0].shape}")
     if type(image_data) == tuple:
         X, y = image_data
     else:
         X = np.array(image_data['images'])
         y = np.array(image_data['labels'])
+    print(f"Shape of loaded X: {X.shape}")
     return X, y
 
 def split_dataset(X, y, test_size, test_split):
@@ -37,9 +40,15 @@ def split_dataset(X, y, test_size, test_split):
     """
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size)
     X_train, X_cv, y_train, y_cv = train_test_split(X_train, y_train, test_size=test_split)
+
+    print(f"Shape of X_train inside split_dataset: {X_train.shape}")
+    print(f"Shape of X_test inside split_dataset: {X_test.shape}")
+    print(f"Shape of X_cv inside split_dataset: {X_cv.shape}")
+
     return X_train, X_test, X_cv, y_train, y_test, y_cv
 
 def preprocess_images(X_train):
+    print(f"Shape of X_train at start of preprocess_images: {X_train.shape}")
     X_train = X_train.reshape(-1, 28, 28, 3)
     datagen = ImageDataGenerator(
         rotation_range=30,
@@ -53,21 +62,36 @@ def preprocess_images(X_train):
 def load_model(path):
     if os.path.exists(path):
         with open(path, 'rb') as f:
-            model = pickle.load(f)
+            loaded_parameters = pickle.load(f)
         print(f"Model loaded from {path}")
-        return model
+        return loaded_parameters
     else:
         print(f"Model not found at {path}")
         return None
 
-def save_model(model, path):
+def save_model(parameters, path):
     with open(path, 'wb') as f:
-        pickle.dump(model, f)
+        pickle.dump(parameters, f)
     print(f"Model saved to {path}")
 
-def print_model_summary(model):
-    print("Model Summary:")
-    model.summary()
+def print_model_summary(layer_dims):
+    print("Layer (type)          Output Shape         Param #")
+    print("===================================================")
+    print(f"Input Layer           (None, {layers_dims[0]})        0")
+
+    total_params = 0
+    for i in range(1, len(layers_dims)):
+        input_dim = layers_dims[i-1]
+        output_dim = layers_dims[i]
+
+        # For a fully connected layer, the number of parameters is (input_dim * output_dim) + output_dim
+        params = (input_dim * output_dim) + output_dim
+        total_params += params
+
+        print(f"FC-{i}                 (None, {output_dim})           {params}")
+
+    print("===================================================")
+    print(f"Total params: {total_params}")
 
 def plot_metrics(history):
     plt.figure(figsize=(12, 6))
@@ -75,7 +99,7 @@ def plot_metrics(history):
     plt.plot(history.history['loss'], label='Training Loss')
     plt.plot(history.history['val_loss'], label='Validation Loss')
     plt.title('Training and Validation Loss')
-    plt.xlabel('Epoch')
+    plt.xlabel('Epoch (every 100th)')
     plt.ylabel('Loss')
     plt.legend()
 
@@ -98,14 +122,16 @@ def plot_costs(costs, learning_rate=0.0075):
     plt.title("Learning rate =" + str(learning_rate))
     plt.show()
 
-def evaluate_model(model, X_test, y_test):
-    predictions = model.predict(X_test)
-    predicted_classes = (predictions > 0.5).astype("int")
+def evaluate_model(predictions, y_test):
+    predicted_classes = np.argmax(predictions, axis=1)
+    
     acc = accuracy_score(y_test, predicted_classes) * 100
     correct_count = (predicted_classes == y_test).sum()
     incorrect_count = (predicted_classes != y_test).sum()
+    
     print(f"Accuracy: {acc}%")
     print(f"Correct Count: {correct_count}")
     print(f"Incorrect Count: {incorrect_count}")
+    
     return acc, correct_count, incorrect_count
 

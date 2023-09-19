@@ -55,25 +55,6 @@ def nn_model(X, Y, n_h, num_iterations = 10000, print_cost=False):
 
     return parameters
 
-def predict(parameters, X):
-    """
-    Using the learned parameters, predicts a class for each example in X
-    
-    Arguments:
-    parameters -- python dictionary containing your parameters 
-    X -- input data of size (n_x, m)
-    
-    Returns
-    predictions -- vector of predictions of our model (red: 0 / blue: 1)
-    """
-    
-
-    A2, cache = forward_propagation(X, parameters)
-    predictions = (A2 > 0.5)
-    # YOUR CODE ENDS HERE
-    
-    return predictions
-
 # Build a model with a n_h-dimensional hidden layer
 # parameters = nn_model(X, Y, n_h = 4, num_iterations = 10000, print_cost=True)
 
@@ -178,48 +159,76 @@ def two_layer_model(X, Y, layers_dims, learning_rate = 0.0075, num_iterations = 
 
     return parameters, costs
 
-def L_layer_model(X, Y, layers_dims, learning_rate = 0.0075, num_iterations = 3000, print_cost=False):
-    """
-    Implements a L-layer neural network: [LINEAR->RELU]*(L-1)->LINEAR->SIGMOID.
-    
-    Arguments:
-    X -- input data, of shape (n_x, number of examples)
-    Y -- true "label" vector (containing 1 if cat, 0 if non-cat), of shape (1, number of examples)
-    layers_dims -- list containing the input size and each layer size, of length (number of layers + 1).
-    learning_rate -- learning rate of the gradient descent update rule
-    num_iterations -- number of iterations of the optimization loop
-    print_cost -- if True, it prints the cost every 100 steps
-    
-    Returns:
-    parameters -- parameters learnt by the model. They can then be used to predict.
-    """
+def L_layer_model(X, Y, layers_dims, X_cv=None, Y_cv=None, learning_rate = 0.0075, num_iterations = 3000, print_cost=False, datagen=None):
+        """
+        Trains an L-layer neural network model using gradient descent.
 
-    np.random.seed(1)
-    costs = []                         # keep track of cost
-    
-    # Parameters initialization.
-    parameters = initialize_parameters_deep(layers_dims)
-    
-    # Loop (gradient descent)
-    for i in range(0, num_iterations):
+        Parameters:
+        - X: Input data of shape (n_x, m) where n_x is the number of features and m is the number of examples.
+        - Y: True "label" vector of shape (1, m).
+        - layers_dims: List containing the number of units in each layer of the network.
+        - X_cv: (Optional) Input data for cross-validation.
+        - Y_cv: (Optional) True "label" vector for cross-validation.
+        - learning_rate: Learning rate for gradient descent.
+        - num_iterations: Number of iterations of the optimization loop.
+        - print_cost: (Optional) If True, print the cost every 100 iterations.
 
-        # Forward propagation: [LINEAR -> RELU]*(L-1) -> LINEAR -> SIGMOID.
-        AL, caches = L_model_forward(X, parameters)
-        
-        
-        # Compute cost.
-        cost = compute_cost(AL, Y)
-            
-        # Backward propagation.
-        grads = L_model_backward(AL, Y, caches)
-         
-        # Update parameters.
-        parameters = update_parameters_deep(parameters, grads, learning_rate)
+        Returns:
+        - parameters: Dictionary containing the parameters learned by the model.
+        - history: Dictionary containing the cost history during training and cross-validation (if provided).
+        """
+
+        history = {
+            "loss": [],
+            "val_loss": [],
+        }
+        np.random.seed(1)
+        costs = []                         # keep track of cost
+
+        # Parameters initialization.
+        parameters = initialize_parameters_deep(layers_dims)
+
+        if datagen is not None:
+            augmented_X = []
+            augmented_Y = []
+
+            for x_batch, y_batch in datagen.flow(X, Y, batch_size=32):  # Adjust batch size as needed
+                augmented_X.append(x_batch)
+                augmented_Y.append(y_batch)
+                if len(augmented_X) >= len(X) / 32:  # Enough augmented data
+                    break
+
+        augmented_X = np.concatenate(augmented_X)
+        augmented_Y = np.concatenate(augmented_Y)
+
+        X = np.concatenate((X, augmented_X))
+        Y = np.concatenate((Y, augmented_Y))
+
+        # Loop (gradient descent)
+        for i in range(0, num_iterations):
+
+            # Forward propagation: [LINEAR -> RELU]*(L-1) -> LINEAR -> SIGMOID.
+            AL, caches = L_model_forward(X, parameters)
+
+            # Compute cost.
+            cost = compute_cost(AL, Y)
+            history["loss"].append(cost)
+
+            if X_val is not None and Y_val is not None:
+                AL_val, _ = L_model_forward(X_cv, parameters)
+                val_cost = compute_cost(AL_val, Y_cv)
+                history["val_loss"].append(val_cost)
+
+            # Backward propagation.
+            grads = L_model_backward(AL, Y, caches)
                 
-        # Print the cost every 100 iterations
-        if print_cost and i % 100 == 0 or i == num_iterations - 1:
-            print("Cost after iteration {}: {}".format(i, np.squeeze(cost)))
-        if i % 100 == 0 or i == num_iterations:
-            costs.append(cost)
-    
-    return parameters, costs
+            # Update parameters.
+            parameters = update_parameters_deep(parameters, grads, learning_rate)
+
+            # Print the cost every 100 iterations
+            if print_cost and i % 100 == 0 or i == num_iterations - 1:
+                print("Cost after iteration {}: {}".format(i, np.squeeze(cost)))
+            if i % 100 == 0 or i == num_iterations:
+                costs.append(cost)
+
+        return parameters, history

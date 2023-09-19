@@ -27,8 +27,7 @@ def load_images(folder_path, label):
             filepath = os.path.join(folder_path, filename)
             image = Image.open(filepath).convert("RGB").resize((28, 28))
             image_array = np.array(image)
-            image_array_flatten = image_array.reshape(image_array.shape[0] * image_array.shape[1] * image_array.shape[2], 1)
-            image_array_standardized = image_array_flatten / 255.0
+            image_array_standardized = image_array / 255.0
             images.append(image_array_standardized)
             labels.append(label)
     return images, labels

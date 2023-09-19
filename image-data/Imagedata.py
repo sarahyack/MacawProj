@@ -26,9 +26,9 @@ def load_images(folder_path, label):
             filepath = os.path.join(folder_path, filename)
             image = Image.open(filepath).convert("RGB").resize((28, 28))
             image_array = np.array(image)
-            image_array_flatten = image_array.reshape(image_array.shape[0] * image_array.shape[1] * image_array.shape[2], 1)
-            image_array_standardized = image_array_flatten / 255.0
-            images.append(image_array_standardized)
+            # image_array_standardized = image_array / 255.0
+            print("Shape of individual image_array:", image_array.shape)
+            images.append(image_array)
             labels.append(label)
     return images, labels
 
@@ -53,8 +53,11 @@ all_labels = labels1 + labels2 + labels3
 all_images = np.array(all_images)
 all_labels = np.array(all_labels)
 
-# Save data to a file
-with open("image_data.pkl", "wb") as f:
-    pickle.dump((all_images, all_labels), f)
+print("Shape of all_images after combining:", all_images.shape)
 
-print("Data saved to image_data.pkl")
+if all_images.shape == (89, 28, 28, 3):
+    # Save data to a file
+    with open("image_data.pkl", "wb") as f:
+        pickle.dump((all_images, all_labels), f)
+
+    print("Data saved to image_data.pkl")
