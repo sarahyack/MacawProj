@@ -42,7 +42,7 @@ def split_dataset(X, y, test_size, test_split):
     return X_train, X_test, X_cv, y_train, y_test, y_cv
 
 def preprocess_images(X_train):
-    X_train = X_train.reshape(-1, 28, 28, 3)
+    X_train = X_train.reshape(-1, 64, 64, 3)
     datagen = ImageDataGenerator(
         rotation_range=30,
         width_shift_range=0.2,

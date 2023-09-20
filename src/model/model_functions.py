@@ -26,7 +26,8 @@ def relu_backward(dA, activation_cache):
 
 def softmax(Z):
     expZ = np.exp(Z - np.max(Z))
-    return expZ / expZ.sum(axis=0, keepdims=True)
+    gZ = expZ / expZ.sum(axis=0, keepdims=True)
+    return gZ, {'Z': Z}
 
 def layer_sizes(X, Y):
     """
@@ -112,9 +113,9 @@ def linear_forward(A, W, b):
     Z -- the input of the activation function, also called pre-activation parameter 
     cache -- a python tuple containing "A", "W" and "b" ; stored for computing the backward pass efficiently
     """
-    A_reshaped = A.reshape(A.shape[0], -1).T
+    # A_reshaped = A.reshape(A.shape[0], -1).T
     
-    Z = np.dot(W, A_reshaped) + b
+    Z = np.dot(W, A) + b
     cache = (A, W, b)
     
     return Z, cache

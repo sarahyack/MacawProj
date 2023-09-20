@@ -16,14 +16,18 @@ X_train, X_test, X_cv, y_train, y_test, y_cv = split_dataset(X, y, test_size=0.3
 
 
 # Preprocess the images
-datagen = preprocess_images(X_train)
+# datagen = preprocess_images(X_train)
+X_train_flatten = X_train.reshape(X_train.shape[0], -1).T
+X_train_standardized = X_train_flatten/255
+print(X_train_standardized.shape)
+
 
 # model = load_model(model_path)
 
-hidden_layers = [2352, 20, 7, 5, 3]
+hidden_layers = [12288, 20, 7, 5, 1]
 
 # if model is None:
-parameters, history = L_layer_model(X_train, y_train, hidden_layers, X_cv, y_cv, 0.0075, 3000, False, datagen)
+parameters, history = L_layer_model(X_train_standardized, y_train, hidden_layers, X_cv, y_cv, 0.0075, 3000, False)
 print("New model created.")
 
 predictions = predict_multi(X_test, parameters)
