@@ -29,6 +29,12 @@ def softmax(Z):
     gZ = expZ / expZ.sum(axis=0, keepdims=True)
     return gZ, {'Z': Z}
 
+def softmax_backward(dA, activation_cache):
+    Z = activation_cache['Z']
+    gZ, _ = softmax(Z)
+    dZ = gZ - Z
+    return dZ
+
 def layer_sizes(X, Y):
     """
     Arguments:
@@ -166,7 +172,8 @@ def L_model_forward(X, parameters):
 
     caches = []
     A = X
-    L = len(parameters) // 2
+    L = len(parameters) // 4
+    print("L:", L)
     
     for l in range(1, L):
         A_prev = A 
@@ -209,7 +216,7 @@ def forward_propagation(X, parameters):
     
     return A2, cache
 
-def compute_cost(A2, Y): #Substitute A2 for AL when using more than two layers
+def compute_cost(AL, Y): #Substitute A2 for AL when using more than two layers
     """
     Computes the cross-entropy cost given in equation (13)
     
@@ -222,12 +229,13 @@ def compute_cost(A2, Y): #Substitute A2 for AL when using more than two layers
     
     """
     
-    m = Y.shape[1] 
+    Y_reshape = Y.reshape(1, 31)
+    m = Y_reshape.shape[1] 
 
     # logprobs = np.multiply(np.log(A2), Y) + np.multiply(np.log(1-A2), (1-Y))
     # cost = (-np.sum(np.multiply(np.log(A2), Y) + np.multiply(np.log(1-A2), (1-Y))))/m
     
-    cost = -1/m * np.sum(Y * np.log(AL))
+    cost = -1/m * np.sum(Y_reshape * np.log(AL))
     cost = float(np.squeeze(cost))     
     
     return cost
@@ -308,9 +316,11 @@ def linear_activation_backward(dA, cache, activation):
     if activation == "relu":
         dZ = relu_backward(dA, activation_cache)
         dA_prev, dW, db = linear_backward(dZ, linear_cache)
-        
     elif activation == "sigmoid":
         dZ = sigmoid_backward(dA, activation_cache)
+        dA_prev, dW, db = linear_backward(dZ, linear_cache)
+    elif activation == "softmax":
+        dZ = softmax_backward(dA, activation_cache)
         dA_prev, dW, db = linear_backward(dZ, linear_cache)
     
     return dA_prev, dW, db
@@ -334,13 +344,14 @@ def L_model_backward(AL, Y, caches):
     """
     grads = {}
     L = len(caches) # the number of layers
+    print("Length of caches: ", L)
     m = AL.shape[1]
     Y = Y.reshape(AL.shape) # after this line, Y is the same shape as AL
     
     dAL = -(np.divide(Y, AL) - np.divide(1-Y, 1-AL))
     
     current_cache = caches[L-1]
-    dA_prev_temp, dW_temp, db_temp = linear_activation_backward(dAL, current_cache, "sigmoid")
+    dA_prev_temp, dW_temp, db_temp = linear_activation_backward(dAL, current_cache, "softmax")
     grads["dA" + str(L-1)] = dA_prev_temp
     grads["dW" + str(L)] = dW_temp
     grads["db" + str(L)] = db_temp

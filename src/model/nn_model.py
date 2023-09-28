@@ -189,6 +189,8 @@ def L_layer_model(X, Y, layers_dims, X_cv=None, Y_cv=None, learning_rate = 0.007
 
         # Parameters initialization.
         parameters = initialize_parameters_deep(layers_dims)
+        print("Parameters", parameters)
+
 
         if datagen is not None:
             augmented_X = []
@@ -211,12 +213,13 @@ def L_layer_model(X, Y, layers_dims, X_cv=None, Y_cv=None, learning_rate = 0.007
 
             # Forward propagation: [LINEAR -> RELU]*(L-1) -> LINEAR -> SIGMOID.
             AL, caches = L_model_forward(X, parameters)
-
+            print("Last layer AL.shape:", AL.shape)
+            print(AL)
             # Compute cost.
             cost = compute_cost(AL, Y)
             history["loss"].append(cost)
 
-            if X_val is not None and Y_val is not None:
+            if X_cv is not None and Y_cv is not None:
                 AL_val, _ = L_model_forward(X_cv, parameters)
                 val_cost = compute_cost(AL_val, Y_cv)
                 history["val_loss"].append(val_cost)
