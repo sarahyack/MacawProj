@@ -25,7 +25,7 @@ def load_images(folder_path, label):
     for filename in os.listdir(folder_path):
         if filename.endswith(".jpg") or filename.endswith(".png"):
             filepath = os.path.join(folder_path, filename)
-            image = Image.open(filepath).convert("RGB").resize((64, 64))
+            image = Image.open(filepath).convert("L").resize((229, 229))
             image_array = np.array(image)
             print(image_array.shape)
             images.append(image_array)

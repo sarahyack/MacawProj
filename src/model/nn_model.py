@@ -188,8 +188,7 @@ def L_layer_model(X, Y, layers_dims, X_cv=None, Y_cv=None, learning_rate = 0.007
         costs = []                         # keep track of cost
 
         # Parameters initialization.
-        parameters = initialize_parameters_deep(layers_dims)
-        print("Parameters", parameters)
+        parameters = initialize_parameters(layers_dims)
 
 
         if datagen is not None:
@@ -210,11 +209,10 @@ def L_layer_model(X, Y, layers_dims, X_cv=None, Y_cv=None, learning_rate = 0.007
 
         # Loop (gradient descent)
         for i in range(0, num_iterations):
-
+            # print("Processing iteration " + str(i))
             # Forward propagation: [LINEAR -> RELU]*(L-1) -> LINEAR -> SIGMOID.
             AL, caches = L_model_forward(X, parameters)
-            print("Last layer AL.shape:", AL.shape)
-            print(AL)
+
             # Compute cost.
             cost = compute_cost(AL, Y)
             history["loss"].append(cost)
@@ -228,7 +226,7 @@ def L_layer_model(X, Y, layers_dims, X_cv=None, Y_cv=None, learning_rate = 0.007
             grads = L_model_backward(AL, Y, caches)
                 
             # Update parameters.
-            parameters = update_parameters_deep(parameters, grads, learning_rate)
+            parameters = update_parameters(parameters, grads, learning_rate)
 
             # Print the cost every 100 iterations
             if print_cost and i % 100 == 0 or i == num_iterations - 1:

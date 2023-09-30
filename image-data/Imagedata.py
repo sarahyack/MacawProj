@@ -24,12 +24,13 @@ def load_images(folder_path, label):
     for filename in os.listdir(folder_path):
         if filename.endswith(".jpg") or filename.endswith(".png"):
             filepath = os.path.join(folder_path, filename)
-            image = Image.open(filepath).convert("RGB").resize((64, 64))
+            image = Image.open(filepath).convert("L").resize((229, 229))
             image_array = np.array(image)
             print(image_array.shape)
             images.append(image_array)
             labels.append(label)
     return images, labels
+
 
 # Folder paths and labels
 folder1 = folder1_path
@@ -44,6 +45,7 @@ images1, labels1 = load_images(folder1, label1)
 images2, labels2 = load_images(folder2, label2)
 images3, labels3 = load_images(folder3, label3)
 
+
 # Combine images and labels from all folders
 all_images = images1 + images2 + images3
 all_labels = labels1 + labels2 + labels3
@@ -54,7 +56,7 @@ all_labels = np.array(all_labels)
 
 print("Shape of all_images after combining:", all_images.shape)
 
-if all_images.shape == (89, 64, 64, 3):
+if all_images.shape == (90, 229, 229):
     # Save data to a file
     with open("image_data.pkl", "wb") as f:
         pickle.dump((all_images, all_labels), f)
