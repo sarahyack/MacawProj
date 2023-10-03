@@ -1,6 +1,6 @@
 #Change this for file paths.
 #Path to model
-model_path = "C:\\Users\\Sarah\\Documents\\My Projects\\Coding\\Machine Learning\\MacawProj\\my_own_model"
+model_path = "C:\\Users\\Sarah\\Documents\\My Projects\\Coding\\Machine Learning\\MacawProj\\my_model"
 #Path to image data (training data)
 image_data_path = "C:\\Users\\Sarah\\Documents\\My Projects\\Coding\\Machine Learning\\MacawProj\\image-data\\image_data.pkl"
 #Path to image data (test data)

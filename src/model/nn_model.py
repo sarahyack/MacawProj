@@ -20,49 +20,22 @@ def nn_model(X, Y, n_h, num_iterations = 10000, print_cost=False):
     n_y = layer_sizes(X, Y)[2]
     
     # Initialize parameters
-    #(≈ 1 line of code)
-    # parameters = ...
-    # YOUR CODE STARTS HERE
     parameters = initialize_parameters(n_x, n_h, n_y)
-    
-    # YOUR CODE ENDS HERE
     
     # Loop (gradient descent)
 
     for i in range(0, num_iterations):
-         
-        #(≈ 4 lines of code)
-        # Forward propagation. Inputs: "X, parameters". Outputs: "A2, cache".
-        # A2, cache = ...
-        
-        # Cost function. Inputs: "A2, Y". Outputs: "cost".
-        # cost = ...
-        
-        # Backpropagation. Inputs: "parameters, cache, X, Y". Outputs: "grads".
-        # grads = ...
-        
-        # Gradient descent parameter update. Inputs: "parameters, grads". Outputs: "parameters".
-        # parameters = ...
-        
-        # YOUR CODE STARTS HERE
+        # Forward propagation
         A2, cache = forward_propagation(X, parameters)
         cost = compute_cost(A2, Y)
         grads = backward_propagation(parameters, cache, X, Y)
         parameters = update_parameters(parameters, grads)
-        # YOUR CODE ENDS HERE
         
         # Print the cost every 1000 iterations
         if print_cost and i % 1000 == 0:
             print ("Cost after iteration %i: %f" %(i, cost))
 
     return parameters
-
-# Build a model with a n_h-dimensional hidden layer
-# parameters = nn_model(X, Y, n_h = 4, num_iterations = 10000, print_cost=True)
-
-# Plot the decision boundary
-# plot_decision_boundary(lambda x: predict(parameters, x.T), X, Y)
-# plt.title("Decision Boundary for hidden layer size " + str(4))
 
 def two_layer_model(X, Y, layers_dims, learning_rate = 0.0075, num_iterations = 3000, print_cost=False):
     """
@@ -87,13 +60,8 @@ def two_layer_model(X, Y, layers_dims, learning_rate = 0.0075, num_iterations = 
     (n_x, n_h, n_y) = layers_dims
     
     # Initialize parameters dictionary, by calling one of the functions you'd previously implemented
-    #(≈ 1 line of code)
-    # parameters = ...
-    # YOUR CODE STARTS HERE
     parameters = initialize_parameters(n_x, n_h, n_y)
-    
-    # YOUR CODE ENDS HERE
-    
+        
     # Get W1, b1, W2 and b2 from the dictionary parameters.
     W1 = parameters["W1"]
     b1 = parameters["b1"]
@@ -104,50 +72,23 @@ def two_layer_model(X, Y, layers_dims, learning_rate = 0.0075, num_iterations = 
 
     for i in range(0, num_iterations):
 
-        # Forward propagation: LINEAR -> RELU -> LINEAR -> SIGMOID. Inputs: "X, W1, b1, W2, b2". Output: "A1, cache1, A2, cache2".
-        #(≈ 2 lines of code)
-        # A1, cache1 = ...
-        # A2, cache2 = ...
-        # YOUR CODE STARTS HERE
         A1, cache1 = linear_activation_forward(X, W1, b1, "relu")
         A2, cache2 = linear_activation_forward(A1, W2, b2, "sigmoid")
-        # YOUR CODE ENDS HERE
-        
-        # Compute cost
-        #(≈ 1 line of code)
-        # cost = ...
-        # YOUR CODE STARTS HERE
+
         cost = compute_cost(A2, Y)
         
-        # YOUR CODE ENDS HERE
-        
-        # Initializing backward propagation
         dA2 = - (np.divide(Y, A2) - np.divide(1 - Y, 1 - A2))
         
-        # Backward propagation. Inputs: "dA2, cache2, cache1". Outputs: "dA1, dW2, db2; also dA0 (not used), dW1, db1".
-        #(≈ 2 lines of code)
-        # dA1, dW2, db2 = ...
-        # dA0, dW1, db1 = ...
-        # YOUR CODE STARTS HERE
         dA1, dW2, db2 = linear_activation_backward(dA2, cache2, "sigmoid")
         da0, dW1, db1 = linear_activation_backward(dA1, cache1, "relu")
-        # YOUR CODE ENDS HERE
-        
-        # Set grads['dWl'] to dW1, grads['db1'] to db1, grads['dW2'] to dW2, grads['db2'] to db2
+
         grads['dW1'] = dW1
         grads['db1'] = db1
         grads['dW2'] = dW2
         grads['db2'] = db2
         
-        # Update parameters.
-        #(approx. 1 line of code)
-        # parameters = ...
-        # YOUR CODE STARTS HERE
         parameters = update_parameters(parameters, grads, learning_rate)
         
-        # YOUR CODE ENDS HERE
-
-        # Retrieve W1, b1, W2, b2 from parameters
         W1 = parameters["W1"]
         b1 = parameters["b1"]
         W2 = parameters["W2"]
@@ -161,7 +102,7 @@ def two_layer_model(X, Y, layers_dims, learning_rate = 0.0075, num_iterations = 
 
     return parameters, costs
 
-def L_layer_model(X, Y, layers_dims, X_cv=None, Y_cv=None, learning_rate = 0.0075, num_iterations = 3000, print_cost=False, datagen=None):
+def L_layer_model(X, Y, layers_dims, X_cv=None, Y_cv=None, learning_rate = 0.1, num_iterations = 3000, print_cost=False, datagen=None):
         """
         Trains an L-layer neural network model using gradient descent.
 
@@ -207,11 +148,14 @@ def L_layer_model(X, Y, layers_dims, X_cv=None, Y_cv=None, learning_rate = 0.007
             X = np.concatenate((X, augmented_X))
             Y = np.concatenate((Y, augmented_Y))
 
+
+        v, s = initialize_adam(parameters)
+        mini_batches = random_mini_batches(X, Y, mini_batch_size = 64)
+        t = 0
+        
         # Loop (gradient descent)
         for i in range(0, num_iterations):
-            # print("Processing iteration " + str(i))
-            # Forward propagation: [LINEAR -> RELU]*(L-1) -> LINEAR -> SIGMOID.
-            AL, caches = L_model_forward(X, parameters)
+            """AL, caches = L_model_forward(X, parameters)
 
             # Compute cost.
             cost = compute_cost(AL, Y)
@@ -226,12 +170,32 @@ def L_layer_model(X, Y, layers_dims, X_cv=None, Y_cv=None, learning_rate = 0.007
             grads = L_model_backward(AL, Y, caches)
                 
             # Update parameters.
-            parameters = update_parameters(parameters, grads, learning_rate)
+            parameters = update_parameters(parameters, grads, learning_rate) """
 
+            total_cost = 0
+            for mini_batch in mini_batches:
+                (mini_batch_X, mini_batch_Y) = mini_batch
+                
+                AL, caches = L_model_forward(mini_batch_X, parameters)
+
+                # Compute cost.
+                cost = compute_cost(AL, mini_batch_Y)
+                total_cost += cost
+
+                # Backward propagation.
+                grads = L_model_backward(AL, mini_batch_Y, caches)
+
+                t +=1
+
+                # Update parameters.
+                parameters, v, s, _, _ = update_parameters_with_adam(parameters, grads, v, s, t, learning_rate=0.1)
+
+            average_cost = total_cost / len(mini_batches)
+            history["loss"].append(average_cost)
             # Print the cost every 100 iterations
             if print_cost and i % 100 == 0 or i == num_iterations - 1:
-                print("Cost after iteration {}: {}".format(i, np.squeeze(cost)))
+                print("Avg Cost after iteration {}: {}".format(i, np.squeeze(average_cost)))
             if i % 100 == 0 or i == num_iterations:
-                costs.append(cost)
-
+                costs.append(average_cost)
+            
         return parameters, history

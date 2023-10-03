@@ -7,6 +7,8 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.models import load_model
 from sklearn.metrics import accuracy_score
 
+from model.model_functions import linear_forward, linear_activation_forward, L_model_forward
+
 def load_data(file_path):
     with open(file_path, "rb") as f:
         image_data = pickle.load(f)
@@ -77,14 +79,13 @@ def save_model(parameters, path):
 def print_model_summary(layer_dims):
     print("Layer (type)          Output Shape         Param #")
     print("===================================================")
-    print(f"Input Layer           (None, {layers_dims[0]})        0")
+    print(f"Input Layer           (None, {layer_dims[0]})        0")
 
     total_params = 0
-    for i in range(1, len(layers_dims)):
-        input_dim = layers_dims[i-1]
-        output_dim = layers_dims[i]
+    for i in range(1, len(layer_dims)):
+        input_dim = layer_dims[i-1]
+        output_dim = layer_dims[i]
 
-        # For a fully connected layer, the number of parameters is (input_dim * output_dim) + output_dim
         params = (input_dim * output_dim) + output_dim
         total_params += params
 
@@ -93,17 +94,18 @@ def print_model_summary(layer_dims):
     print("===================================================")
     print(f"Total params: {total_params}")
 
+
 def plot_metrics(history):
     plt.figure(figsize=(12, 6))
     plt.subplot(1, 2, 1)
-    plt.plot(history.history['loss'], label='Training Loss')
-    plt.plot(history.history['val_loss'], label='Validation Loss')
+    plt.plot(history['loss'], label='Training Loss')
+    plt.plot(history['val_loss'], label='Validation Loss')
     plt.title('Training and Validation Loss')
     plt.xlabel('Epoch (every 100th)')
     plt.ylabel('Loss')
     plt.legend()
 
-    if 'accuracy' in history.history:
+    if 'accuracy' in history:
         plt.subplot(1, 2, 2)
         plt.plot(history.history['accuracy'], label='Training Accuracy')
         plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
@@ -122,10 +124,14 @@ def plot_costs(costs, learning_rate=0.0075):
     plt.title("Learning rate =" + str(learning_rate))
     plt.show()
 
-def evaluate_model(predictions, y_test):
-    predicted_classes = np.argmax(predictions, axis=1)
+
+def predict_and_evaluate(X, y_test, parameters):
+    output, _ = L_model_forward(X, parameters)
     
+    predicted_classes = np.argmax(output, axis=0)
+
     acc = accuracy_score(y_test, predicted_classes) * 100
+    
     correct_count = (predicted_classes == y_test).sum()
     incorrect_count = (predicted_classes != y_test).sum()
     
@@ -134,4 +140,3 @@ def evaluate_model(predictions, y_test):
     print(f"Incorrect Count: {incorrect_count}")
     
     return acc, correct_count, incorrect_count
-

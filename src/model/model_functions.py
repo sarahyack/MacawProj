@@ -1,5 +1,6 @@
 import numpy as np
 import copy
+import math
 
 
 def relu(Z):
@@ -8,6 +9,7 @@ def relu(Z):
     return A, cache
 
 def softmax(Z):
+    Z -= np.max(Z, axis=0)
     A = np.exp(Z) / np.sum(np.exp(Z), axis=0)
     cache = Z
     return A, cache
@@ -24,12 +26,129 @@ def softmax_backward(dA, cache):
     return dZ
 
 def initialize_parameters(layer_dims):
+    """
+    Initializes the parameters for a neural network with the specified layer dimensions.
+
+    Parameters:
+    - layer_dims (list): A list of integers representing the dimensions of each layer in the network.
+
+    Returns:
+    - parameters (dict): A dictionary containing the randomly initialized weights and biases for each layer in the network.
+    """
     parameters = {}
-    L = len(layer_dims)
+    L = len(layer_dims) // 2
     for l in range(1, L):
-        parameters['W' + str(l)] = np.random.randn(layer_dims[l], layer_dims[l-1]) * 0.01
+        parameters['W' + str(l)] = np.random.randn(layer_dims[l], layer_dims[l-1]) * np.sqrt(2. / layer_dims[l-1])
         parameters['b' + str(l)] = np.zeros((layer_dims[l], 1))
     return parameters
+
+def random_mini_batches(X, y, mini_batch_size = 64):
+    m = X.shape[1]
+    mini_batches = []
+
+    permutation = list(np.random.permutation(m))
+    shuffled_X = X[:, permutation]
+    shuffled_Y = y[permutation, :]
+    print("X shape:", X.shape)
+    print("shuffled_X shape:", shuffled_X.shape)
+    print("shuffled_Y shape:", shuffled_Y.shape)
+
+    inc = mini_batch_size
+    num_complete_mini_batches = math.floor(m / mini_batch_size)
+    for k in range(0, num_complete_mini_batches):
+        mini_batch_X = shuffled_X[:, k * inc : (k + 1) * inc]
+        mini_batch_Y = shuffled_Y[k * inc : (k + 1) * inc, :]
+        mini_batch = (mini_batch_X, mini_batch_Y)
+        mini_batches.append(mini_batch)
+    if m % mini_batch_size != 0:
+        mini_batch_X = shuffled_X[:, num_complete_mini_batches * inc :]
+        mini_batch_Y = shuffled_Y[:, num_complete_mini_batches * inc :]
+        print("mini_batch_Y shape:", mini_batch_Y.shape)
+        mini_batch = (mini_batch_X, mini_batch_Y)
+        mini_batches.append(mini_batch)
+    return mini_batches
+
+def initialize_adam(parameters) :
+    """
+    Initializes v and s as two python dictionaries with:
+                - keys: "dW1", "db1", ..., "dWL", "dbL" 
+                - values: numpy arrays of zeros of the same shape as the corresponding gradients/parameters.
+    
+    Arguments:
+    parameters -- python dictionary containing your parameters.
+                    parameters["W" + str(l)] = Wl
+                    parameters["b" + str(l)] = bl
+    
+    Returns: 
+    v -- python dictionary that will contain the exponentially weighted average of the gradient. Initialized with zeros.
+                    v["dW" + str(l)] = ...
+                    v["db" + str(l)] = ...
+    s -- python dictionary that will contain the exponentially weighted average of the squared gradient. Initialized with zeros.
+                    s["dW" + str(l)] = ...
+                    s["db" + str(l)] = ...
+
+    """
+    
+    L = len(parameters) // 2
+    v = {}
+    s = {}
+    
+    for l in range(1, L + 1):
+        v["dW" + str(l)] = np.zeros(parameters['W' + str(l)].shape)
+        v["db" + str(l)] = np.zeros(parameters['b' + str(l)].shape)
+        s["dW" + str(l)] = np.zeros(parameters['W' + str(l)].shape)
+        s["db" + str(l)] = np.zeros(parameters['b' + str(l)].shape)
+    
+    return v, s
+
+def update_parameters_with_adam(parameters, grads, v, s, t, learning_rate = 0.01,
+                                beta1 = 0.9, beta2 = 0.999,  epsilon = 1e-8):
+    """
+    Update parameters using Adam
+    
+    Arguments:
+    parameters -- python dictionary containing parameters:
+                    parameters['W' + str(l)] = Wl
+                    parameters['b' + str(l)] = bl
+    grads -- python dictionary containing gradients for each parameters:
+                    grads['dW' + str(l)] = dWl
+                    grads['db' + str(l)] = dbl
+    v -- Adam variable, moving average of the first gradient, python dictionary
+    s -- Adam variable, moving average of the squared gradient, python dictionary
+    t -- Adam variable, counts the number of taken steps
+    learning_rate -- the learning rate, scalar.
+    beta1 -- Exponential decay hyperparameter for the first moment estimates 
+    beta2 -- Exponential decay hyperparameter for the second moment estimates 
+    epsilon -- hyperparameter preventing division by zero in Adam updates
+
+    Returns:
+    parameters -- python dictionary containing updated parameters 
+    v -- Adam variable, moving average of the first gradient, python dictionary
+    s -- Adam variable, moving average of the squared gradient, python dictionary
+    """
+    
+    L = len(parameters) // 2
+    v_corrected = {}
+    s_corrected = {}
+    
+    # Perform Adam update on all parameters
+    for l in range(1, L + 1):
+        v["dW" + str(l)] = beta1 * v["dW" + str(l)] + (1 - beta1) * grads["dW" + str(l)]
+        v["db" + str(l)] = beta1 * v["db" + str(l)] + (1 - beta1) * grads["db" + str(l)]
+
+        v_corrected["dW" + str(l)] = v["dW" + str(l)]/(1 - np.power(beta1, t))
+        v_corrected["db" + str(l)] = v["db" + str(l)]/(1 - np.power(beta1, t))
+
+        s["dW" + str(l)] = beta2 * s["dW" + str(l)] + (1 - beta2) * np.power(grads["dW" + str(l)], 2)
+        s["db" + str(l)] = beta2 * s["db" + str(l)] + (1 - beta2) * np.power(grads["db" + str(l)], 2)
+
+        s_corrected["dW" + str(l)] = s["dW" + str(l)]/(1 - np.power(beta2, t))
+        s_corrected["db" + str(l)] = s["db" + str(l)]/(1 - np.power(beta2, t))
+
+        parameters['W' + str(l)] = parameters['W' + str(l)] - learning_rate * (v_corrected["dW" + str(l)]/(np.sqrt(s_corrected["dW" + str(l)]) + epsilon))
+        parameters['b' + str(l)] = parameters['b' + str(l)] - learning_rate * (v_corrected["db" + str(l)]/(np.sqrt(s_corrected["db" + str(l)]) + epsilon))
+
+    return parameters, v, s, v_corrected, s_corrected
 
 def linear_forward(A, W, b):
     Z = np.dot(W, A) + b
@@ -59,17 +178,14 @@ def L_model_forward(X, parameters):
     return AL, caches
 
 def compute_cost(AL, Y):
+    print("Shape of Y:", Y.shape)
+    print("Shape of AL:", AL.shape)
+    
     m = Y.shape[0]
     epsilon = 1e-8
     cost = -1/m * np.sum(Y.T * np.log(AL + epsilon))
     cost = np.squeeze(cost)
     return cost
-
-def predict_results(X, parameters):
-    output, _ = L_model_forward(X, parameters)
-    predictions = np.argmax(output, axis=1)
-
-    return predictions
 
 def linear_backward(dZ, cache):
     A_prev, W, b = cache
