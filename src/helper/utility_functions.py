@@ -54,12 +54,19 @@ def preprocess_images(X_train):
     datagen.fit(X_train)
     return datagen
 
-def one_hot_encode(y, num_classes):
+def one_hot_encode(y):
     m = len(y)
-    one_hot = np.zeros((num_classes, m))
+    encoded = np.zeros((m, 2))
+    
     for i in range(m):
-        one_hot[int(y[i]), i] = 1
-    return one_hot
+        if y[i] == 0:  # No bird
+            encoded[i] = [0, 0]
+        elif y[i] == 1:  # Bird but not macaw
+            encoded[i] = [1, 0]
+        elif y[i] == 2:  # Macaw
+            encoded[i] = [1, 1]
+
+    return encoded
 
 def load_model(path):
     if os.path.exists(path):

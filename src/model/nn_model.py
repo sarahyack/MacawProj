@@ -102,7 +102,7 @@ def two_layer_model(X, Y, layers_dims, learning_rate = 0.0075, num_iterations = 
 
     return parameters, costs
 
-def L_layer_model(X, Y, layers_dims, X_cv=None, Y_cv=None, learning_rate = 0.1, num_iterations = 3000, print_cost=False, datagen=None):
+def L_layer_model(X, Y, layers_dims, X_cv=None, Y_cv=None, learning_rate = 0.001, num_iterations = 3000, print_cost=False, datagen=None):
         """
         Trains an L-layer neural network model using gradient descent.
 
@@ -150,52 +150,32 @@ def L_layer_model(X, Y, layers_dims, X_cv=None, Y_cv=None, learning_rate = 0.1, 
 
 
         v, s = initialize_adam(parameters)
-        mini_batches = random_mini_batches(X, Y, mini_batch_size = 64)
-        t = 0
+        t = 1
         
         # Loop (gradient descent)
         for i in range(0, num_iterations):
-            """AL, caches = L_model_forward(X, parameters)
+            AL, caches = L_model_forward(X, parameters)
 
             # Compute cost.
             cost = compute_cost(AL, Y)
             history["loss"].append(cost)
 
             if X_cv is not None and Y_cv is not None:
-                AL_val, _ = L_model_forward(X_cv, parameters)
-                val_cost = compute_cost(AL_val, Y_cv)
+                B_val, M_val,  _ = L_model_forward(X_cv, parameters)
+                val_cost = compute_cost(B_val, M_val, Y_cv)
                 history["val_loss"].append(val_cost)
 
             # Backward propagation.
             grads = L_model_backward(AL, Y, caches)
                 
             # Update parameters.
-            parameters = update_parameters(parameters, grads, learning_rate) """
+            parameters, v, s = update_parameters_with_adam(parameters, grads, v, s, t, learning_rate)
+            t+=1
 
-            total_cost = 0
-            for mini_batch in mini_batches:
-                (mini_batch_X, mini_batch_Y) = mini_batch
-                
-                AL, caches = L_model_forward(mini_batch_X, parameters)
-
-                # Compute cost.
-                cost = compute_cost(AL, mini_batch_Y)
-                total_cost += cost
-
-                # Backward propagation.
-                grads = L_model_backward(AL, mini_batch_Y, caches)
-
-                t +=1
-
-                # Update parameters.
-                parameters, v, s, _, _ = update_parameters_with_adam(parameters, grads, v, s, t, learning_rate=0.1)
-
-            average_cost = total_cost / len(mini_batches)
-            history["loss"].append(average_cost)
             # Print the cost every 100 iterations
             if print_cost and i % 100 == 0 or i == num_iterations - 1:
-                print("Avg Cost after iteration {}: {}".format(i, np.squeeze(average_cost)))
+                print("Avg Cost after iteration {}: {}".format(i, np.squeeze(cost)))
             if i % 100 == 0 or i == num_iterations:
-                costs.append(average_cost)
+                costs.append(cost)
             
         return parameters, history
