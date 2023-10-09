@@ -58,7 +58,7 @@ predict_and_evaluate(X_test_standardized, y_test, parameters)
 print("X CV:")
 predict_and_evaluate(X_cv_standardized, y_cv, parameters)
 print("X:")
-predict_and_evaluate(X_standardized, y, parameters)
+predict_and_evaluate(X_standardized, y_full, parameters)
 
 # Save the model after training
 save_model(parameters, model_path)
